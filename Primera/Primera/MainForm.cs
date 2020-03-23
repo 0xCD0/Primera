@@ -54,14 +54,14 @@ namespace Primera {
 
                         int i = 1;
                         foreach (FileInfo file in di.GetFiles()) {
-                            if(file.Extension != ".psd") {
+                            if (file.Extension != ".psd") {
                                 MessageBox.Show("PSD 파일만 변환이 가능합니다.", "에러");
                                 di = new DirectoryInfo(resultPath);
                                 di.Delete();
                                 setStatus(Status.ready);
                                 return;
                             }
-                            PSDToPNG(file.FullName, file.Name.Replace(".psd",""), resultPath);
+                            PSDToPNG(file.FullName, file.Name.Replace(".psd", ""), resultPath);
                             progress_file.Value = i;
                             i++;
                         }
@@ -88,7 +88,7 @@ namespace Primera {
                                 setStatus(Status.ready);
                                 return;
                             }
-                            PSDToPNG(info.FullName, info.Name, resultPath);
+                            PSDToPNG(info.FullName, info.Name.Replace(".psd", ""), resultPath);
                             progress_file.Value = i;
                             i++;
                         }
@@ -107,32 +107,35 @@ namespace Primera {
                 setStatus(Status.ready);
             }
         }
-        
+
         #region Functions
         private void PSDToPNG(string psdPath, string fileName, string resultPath) {
             using (MagickImageCollection imgs = new MagickImageCollection(psdPath)) {
                 int width = imgs[0].Width;
                 int height = imgs[0].Height;
 
-                for (int i = 1; i < imgs.Count; i++) {
-                    using (MagickImageCollection result = new MagickImageCollection()) {
-                        MagickColor transparent = new MagickColor(0, 0, 0, 0);
-                        MagickImage for_coalesce = new MagickImage(transparent, width, height);
-                        for_coalesce.BackgroundColor = transparent;
+                //MagickImageCollection result = new MagickImageCollection();
+                //for (int i = 1; i < imgs.Count; i++) {
+                //    MagickColor transparent = new MagickColor(0, 0, 0, 0);
+                //    MagickImage for_coalesce = new MagickImage(transparent, width, height);
+                //    for_coalesce.BackgroundColor = transparent;
 
-                        result.Add(for_coalesce);
-                        result.Add(imgs[i]);
+                //    result.Add(for_coalesce);
+                //    result.Add(imgs[i]);
+                //    //result.Combine();
 
-                        result.Coalesce();
-                        result[1].Write($"{resultPath}\\{fileName}.png");
-                    }
-
-                    if (i % 20 == 0) {
-                        GC.Collect();
-                        GC.WaitForPendingFinalizers();
-                        GC.Collect();
-                    }
-                }
+                //    if (i % 20 == 0) {
+                //        GC.Collect();
+                //        GC.WaitForPendingFinalizers();
+                //        GC.Collect();
+                //    }
+                //}
+                imgs.Merge();
+                string filepath = $"{resultPath}\\{fileName}.png";
+                imgs[0].Write(filepath);
+                FileInfo info = new FileInfo($"{resultPath}\\{fileName}-0.png");
+                info.MoveTo(filepath);
+                //result.Write();
             }
         }
 
